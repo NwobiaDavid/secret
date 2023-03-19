@@ -11,7 +11,11 @@ const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-// const findOrCreate = require('mongoose-findorcreate');
+const findOrCreate = require('mongoose-findorcreate');
+const FacebookStrategy = require('passport-facebook').Strategy;
+// const routes = require('./routes.js');
+// const config = require('./config')
+
 
 const app = express();
 const port = 3000;
@@ -39,11 +43,24 @@ mongoose.connect("mongodb://127.0.0.1:27017/userDB",{useNewUrlParser: true});
 const userSchema= new mongoose.Schema({
     email: String,
     password: String,
-    googleId: String
+    googleId: String,
+    facebookId: String
 });
 
 userSchema.plugin(passportLocalMongoose);
-// userSchema.plugin(findOrCreate);
+
+// userSchema.statics.findOrCreate = function findOrCreate(profile, cb){
+//     var userObj = new this();
+//     this.findOne({_id : profile.id},function(err,result){ 
+//         if(!result){
+//             userObj.username = profile.displayName;
+//             //....
+//             userObj.save(cb);
+//         }else{
+//             cb(err,result);
+//         }
+//     });
+// };
 
 const User= mongoose.model("User", userSchema);
 
@@ -92,9 +109,33 @@ async function (accessToken, refreshToken, profile, done) {
   }
 ));
 
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_CLIENT_ID,
+    clientSecret: process.env.FACEBOOK_CLIENT_SECRETS,
+    callbackURL: "http://localhost:3000/auth/facebook/secrets"
+  },
+function(accessToken, refreshToken, profile, cb) {
+
+      return cb(null, profile);
+  }
+));
+
+
+
+
 app.get("/",(req,res)=>{
     res.render("home");
 })
+
+app.get('/auth/facebook',
+  passport.authenticate('facebook', { scope: ['public_profile'] }));
+
+app.get('/auth/facebook/secrets',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/secrets');
+  });
 
 app.get('/auth/google',
   passport.authenticate('google', { scope: ["profile"] }));
@@ -120,9 +161,10 @@ app.get("/secrets",(req,res)=>{
     if(req.isAuthenticated()){
         res.render("secrets");
     }else{
-        res.render("/login");
+        res.redirect("/login");
     }
 });
+
 
 app.get("/logout", (req,res)=>{
     req.logout(function(err) {
@@ -159,9 +201,9 @@ app.post("/login",(req,res)=>{
         if(err){
             console.log(err);
         }else{
-            passport.authenticate("local")(req, res, function(){
+            passport.authenticate("local"),function(req, res){
                 res.redirect("/secrets");
-            })
+            }
         }
     })
 
