@@ -13,7 +13,7 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 // const saltRounds = 11;
 
 app.use(express.static('public'));
@@ -31,7 +31,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb://127.0.0.1:27017/userDB', { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 const userSchema = new mongoose.Schema({
   email: String,
