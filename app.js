@@ -68,7 +68,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/auth/google/secrets',
+      callbackURL: 'https://secret-fkvw.onrender.com/auth/google/secrets',
       userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
     },
     async function (accessToken, refreshToken, profile, done) {
@@ -101,7 +101,7 @@ passport.use(
     {
       clientID: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRETS,
-      callbackURL: 'http://localhost:3000/auth/facebook/secrets',
+      callbackURL: 'https://secret-fkvw.onrender.com/auth/facebook/secrets',
     },
     async function (accessToken, refreshToken, profile, done) {
         try {
